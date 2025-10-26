@@ -1,6 +1,4 @@
-# Hiding-in-Plain-Sight-A-DNS-C2-Detection-Lab
-
-Hiding in Plain Sight: A DNS C2 & Detection Lab ("Tunnelslot")
+<b>Hiding in Plain Sight: A DNS C2 & Detection Lab ("Tunnelslot") </b>
 
 This project details the construction, execution, and detection of a covert Command & Control (C2) channel operating over the Domain Name System (DNS) protocol within an isolated virtual lab environment. It demonstrates the "Tunnelslot" concept, combining "Living off the Land" (LotL) techniques with DNS tunneling.
 
@@ -12,76 +10,64 @@ Concept: "Living off Tunnelslots"
 
 This project explores a methodology focused on combining two stealthy attack techniques:
 
-"Living off the Land" (LotL): Utilizing legitimate, pre-installed system tools (specifically Windows PowerShell in this lab) to execute malicious actions, thereby bypassing traditional signature-based antivirus and blending in with normal administrative activity.
+"Living off the Land" (LotL): Utilizing legitimate, pre-installed system tools (specifically Windows PowerShell in this lab) to execute malicious actions, thereby bypassing traditional signature-based antivirus and blending in with normal administrative activity. 
 
-DNS Tunneling (The "Tunnelslot"): Abusing the DNS protocol, which is almost universally allowed through firewalls, as a covert channel ("tunnelslot") to exfiltrate data and maintain C2 communications. Data is encoded within DNS queries (often in subdomains) directed to an attacker-controlled server.
+DNS Tunneling (The "Tunnelslot"): Abusing the DNS protocol, which is almost universally allowed through firewalls, as a covert channel ("tunnelslot") to exfiltrate data and maintain C2 communications. Data is encoded within DNS queries (often in subdomains) directed to an attacker-controlled server. 🕳️
 
-Lab Overview
+Lab Overview 🔬
 
 A simple, isolated virtual lab was used for this demonstration:
 
-Attacker: Kali Linux VM running the dnscat2 server.
+<ul>
+<li><b>Attacker:</b> Kali Linux VM running the <code>dnscat2</code> server.</li>
+<li><b>Victim:</b> Windows 10/11 VM running the <code>dnscat2</code> PowerShell client.</li>
+<li><b>Network:</b> Host-only virtual network with the victim's DNS explicitly set to the attacker's IP.</li>
+<li><b>Analysis Tool:</b> Wireshark on the victim VM for capturing DNS traffic.</li>
+</ul>
 
-Victim: Windows 10/11 VM running the dnscat2 PowerShell client.
-
-Network: Host-only virtual network with the victim's DNS explicitly set to the attacker's IP.
-
-Analysis Tool: Wireshark on the victim VM for capturing DNS traffic.
-
-(Optional: Replace placeholder_diagram.png with a simple diagram image file in your img folder showing Attacker VM -> DNS -> Victim VM)
-
-Attack Phases Summary
+Attack Phases Summary ⚔️
 
 The attack simulation involved:
 
-Server Setup: Starting the dnscat2 server on Kali.
+<ol>
+<li><b>Server Setup:</b> Starting the <code>dnscat2</code> server on Kali.</li>
+<li><b>Client Execution:</b> Running the <code>dnscat2.ps1</code> script via PowerShell on the Windows victim.</li>
+<li><b>C2 Establishment:</b> Verifying the successful connection back to the server.</li>
+<li><b>Remote Command Execution:</b> Obtaining a remote shell (<code>cmd.exe</code>) and executing commands like <code>ipconfig</code>.</li>
+<li><b>Data Exfiltration:</b> Using the <code>dnscat2</code> <code>download</code> command to steal a file (<code>Secret.txt</code>) over the DNS tunnel.</li>
+</ol>
 
-Client Execution: Running the dnscat2.ps1 script via PowerShell on the Windows victim.
-
-C2 Establishment: Verifying the successful connection back to the server.
-
-Remote Command Execution: Obtaining a remote shell (cmd.exe) and executing commands like ipconfig.
-
-Data Exfiltration: Using the dnscat2 download command to steal a file (Secret.txt) over the DNS tunnel.
-
-Detection Summary (Blue Team)
+Detection Summary (Blue Team) 
 
 Despite its stealth, the attack generates detectable artifacts:
 
-Network (Wireshark):
+<ul>
+<li><b>Network (Wireshark):</b>
+<ul>
+<li><b>Anomalous DNS Queries:</b> High volume of DNS requests (<code>TXT</code>, <code>CNAME</code>, <code>MX</code>) to a single, non-standard domain (<code>evil2.com</code>).</li>
+<li><b>High Entropy Subdomains:</b> Queries contain long, hex-encoded strings instead of readable hostnames.</li>
+<li><b>Direct Endpoint-to-Server DNS:</b> Traffic goes directly between endpoint and attacker IP, bypassing normal corporate DNS infrastructure.</li>
+</ul>
+</li>
+<li><b>Host (Sysmon):</b>
+<ul>
+<li><b>Suspicious Process Creation:</b> <code>powershell.exe</code> launching with unusual parameters or initiating network connections.</li>
+<li><b>Anomalous Network Connections:</b> <code>powershell.exe</code> making direct outbound connections on UDP port 53.</li>
+<li><b>Unusual Process Chains:</b> <code>powershell.exe</code> spawning <code>cmd.exe</code>.</li>
+</ul>
+</li>
+</ul>
 
-Anomalous DNS Queries: High volume of DNS requests (TXT, CNAME, MX) to a single, non-standard domain (evil2.com).
+Tools Used 🛠️
 
-High Entropy Subdomains: Queries contain long, hex-encoded strings instead of readable hostnames.
+<ul>
+<li><a href="https://github.com/iagox86/dnscat2">dnscat2</a> (Server & PowerShell Client)</li>
+<li><a href="https://www.vmware.com/">VMware</li>
+<li>Kali Linux</li>
+<li>Windows 10/11 Evaluation</li>
+<li><a href="https://www.wireshark.org/">Wireshark</a></li>
+</ul>
 
-Direct Endpoint-to-Server DNS: Traffic goes directly between endpoint and attacker IP, bypassing normal corporate DNS infrastructure.
-
-Host (Sysmon):
-
-Suspicious Process Creation: powershell.exe launching with unusual parameters or initiating network connections.
-
-Anomalous Network Connections: powershell.exe making direct outbound connections on UDP port 53.
-
-Unusual Process Chains: powershell.exe spawning cmd.exe.
-
-Tools Used
-
-dnscat2 (Server & PowerShell Client)
-
-VirtualBox (or VMware)
-
-Kali Linux
-
-Windows 10/11 Evaluation
-
-Wireshark
-
-Sysmon (for host-based detection concepts)
-
-Full Report
+Full Report 📄
 
 For a detailed walkthrough, analysis, mitigation strategies, and annotated screenshots, please see the full Report.pdf included in this repository.
-
-License
-
-This project is licensed under the MIT License - see the LICENSE file for details (Optional: Create a LICENSE file if you want).
